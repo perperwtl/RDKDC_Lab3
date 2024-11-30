@@ -12,12 +12,12 @@ function Jb = ur5BodyJacobian(q)
     th5 = q(5);
     th6 = q(6);
 
-    l0 = 0;
-    l1 = 0;
-    l2 = 0;
-    l3 = 0; 
-    l4 = 0; 
-    l5 = 0; 
+    l0 = 0.0892;
+    l1 = 0.425; 
+    l2 = 0.392; 
+    l3 = 0.1093; 
+    l4 = 0.09475; 
+    l5 = 0.0825; 
 
     % Define the Body Jacobian 
     Jb = [
