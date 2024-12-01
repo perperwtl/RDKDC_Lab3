@@ -1,12 +1,13 @@
-clc
-clear all
+clc;
+clear all;
+close all;
 
 ur5 = ur5_interface();
 tf_frame.get_tf_tree();
 
-is_test_ur5FwdKin = 0;
+is_test_ur5FwdKin = 1;
 is_test_ur5BodyJacobian = 0;
-is_test_manipulability = 1;
+is_test_manipulability = 0;
 is_test_getXi = 0;
 is_test_ur5RRcontrol = 0;
 
@@ -24,17 +25,18 @@ if is_test_ur5FwdKin
         0;
         0];
 
-    angle = 0;
+    angle = 0 * pi/180;
 
     q = q + angle;
-
+    
+    q_offset = [0; pi/2; 0; pi/2; 0; 0];
     g = ur5FwdKin(q);
 
     ur5.move_joints(q, 5);
     pause(5);
     fwd_real = ur5.get_current_transformation('base_link', 'tool0');
     
-
+    
     fwdKinToolFrame = tf_frame('base_link','fwdKinToolFrame',eye(4));
     fwdKinToolFrame.move_frame('base_link', g);
     pause(3);
@@ -107,11 +109,11 @@ if is_test_manipulability
     num_points = length(theta3_values);
     
     % Random pose for the other joint angles (avoid singularities)
-    theta1 = 1.5 * pi; % Random angle in [0, 2π]
-    theta2 = 1.5 * pi;
-    theta4 = 1.5 * pi;
-    theta5 = 1.5 * pi;
-    theta6 = 1.5 * pi;
+    theta1 = 0.1 * pi; % Random angle in [0, 2π]
+    theta2 = 0.1 * pi;
+    theta4 = 0.1 * pi;
+    theta5 = 0.1 * pi;
+    theta6 = 0.1 * pi;
     
     % Initialize arrays to store manipulability measures
     sigmamin_values = zeros(1, num_points);
