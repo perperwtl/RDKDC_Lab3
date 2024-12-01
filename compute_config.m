@@ -40,7 +40,7 @@ gst0 = RPToHomogeneous([e1,-e3,e2], [0; l3 + l5; l0+l1+l2+l4]);%reverse x and y 
 
 % Compute forward kinematics with joint offsets
 joint_offsets = [0; -pi/2; 0; -pi/2; 0; 0]; % New initial configuration offsets
-% joint_offsets = [0;0;0;0;0;0];
+joint_offsets = [0;0;0;0;0;0];
 gst = ForwardKinematics({xi1, th1 + joint_offsets(1); 
                          xi2, th2 + joint_offsets(2); 
                          xi3, th3 + joint_offsets(3); 
