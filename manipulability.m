@@ -12,7 +12,7 @@ function mu = manipulability(J, measure)
     if measure == "sigmamin"
         mu = sigma_min;
     elseif measure == "detjac"
-        mu = det(J);
+        mu = prod(singular_values);
     elseif measure == "invcond"
         mu = sigma_min / sigma_max;
     else

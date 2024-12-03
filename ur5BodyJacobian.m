@@ -56,7 +56,15 @@ function Jb = ur5BodyJacobian(q)
     exi5 = expm(TwistExp(xi5)* th5);
     exi6 = expm(TwistExp(xi6)* th6);
 
-    x2 = RigidAdjoint(xi1)
-    x3 = 
+    x2 = RigidAdjoint(exi1) * xi2;
+    x3 = RigidAdjoint(exi1 * exi2) * xi3;
+    x4 = RigidAdjoint(exi1 * exi2 * exi3) * xi4;
+    x5 = RigidAdjoint(exi1 * exi2 * exi3 * exi4) * xi5;
+    x6 = RigidAdjoint(exi1 * exi2 * exi3 * exi4 * exi5) * xi6;
+
+    Js = [xi1, x2, x3, x4, x5, x6];
+    g = ur5FwdKin(q);
+    adj = RigidAdjoint(g);
+    Jb = inv(adj) * Js;
 
 end

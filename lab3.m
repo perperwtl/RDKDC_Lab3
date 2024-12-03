@@ -5,9 +5,9 @@ close all;
 ur5 = ur5_interface();
 tf_frame.get_tf_tree();
 
-is_test_ur5FwdKin = 1;
+is_test_ur5FwdKin = 0;
 is_test_ur5BodyJacobian = 0;
-is_test_manipulability = 0;
+is_test_manipulability = 1;
 is_test_getXi = 0;
 is_test_ur5RRcontrol = 0;
 
@@ -104,11 +104,17 @@ if is_test_manipulability
     num_points = length(theta3_values);
     
     % Random pose for the other joint angles (avoid singularities)
-    theta1 = 0.1 * pi; % Random angle in [0, 2π]
-    theta2 = 0.1 * pi;
-    theta4 = 0.1 * pi;
-    theta5 = 0.1 * pi;
-    theta6 = 0.1 * pi;
+    % theta1 = 0.1 * pi; % Random angle in [0, 2π]
+    % theta2 = 0.1 * pi;
+    % theta4 = 0.1 * pi;
+    % theta5 = 0.1 * pi;
+    % theta6 = 0.1 * pi;
+    
+    theta1 = 0; % Random angle in [0, 2π]
+    theta2 = pi / 6;
+    theta4 = 0;
+    theta5 = pi / 4;
+    theta6 = 0;
     
     % Initialize arrays to store manipulability measures
     sigmamin_values = zeros(1, num_points);
