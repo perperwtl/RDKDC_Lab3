@@ -6,13 +6,10 @@ ur5 = ur5_interface();
 tf_frame.get_tf_tree();
 
 is_test_ur5FwdKin = 0;
-is_test_ur5BodyJacobian = 0;
-is_test_manipulability = 1;
+is_test_ur5BodyJacobian = 1;
+is_test_manipulability = 0;
 is_test_getXi = 0;
 is_test_ur5RRcontrol = 0;
-
-q_offset = [0; -pi/2; 0; -pi/2; 0; 0];
-
 
 %% Test ur5FwdKin.m
 if is_test_ur5FwdKin
@@ -47,54 +44,52 @@ end
 
 %% Test ur5BodyJacobian.m
 if is_test_ur5BodyJacobian
-    % Parameters
-    epsilon = 1e-6;           % Small perturbation value
-    q = rand(6, 1) * 2 * pi;  % Random joint configuration in [0, 2π]
+    disp("Start Test ur5BodyJacobian...")
+    epsilon = 1e-6;
     
-    % Compute the exact Jacobian using ur5BodyJacobian
-    gst = ur5FwdKin(q);       % Forward kinematics to get gst
-    J = ur5BodyJacobian(q);  % Exact Jacobian
+    % Define a random test joint configuration
+    q = [pi/6; pi/4; pi/3; pi/2; pi/8; pi/6];
     
-    % Initialize approximate Jacobian
-    J_approx = zeros(6, 6);
+    % Compute the Jacobian using the provided function
+    Jb_analytical = ur5BodyJacobian(q);
     
-    % Compute approximate Jacobian column-by-column
+    % Initialize the numerical Jacobian matrix
+    Jb_numerical = zeros(6, 6);
+    
+    % Compute the numerical Jacobian using central difference approximation
     for i = 1:6
-        % Perturb the i-th joint angle by +epsilon and -epsilon
-        q_plus = q;
-        q_minus = q;
-        q_plus(i) = q_plus(i) + epsilon;
-        q_minus(i) = q_minus(i) - epsilon;
-    
-        % Forward kinematics for perturbed configurations
-        gst_plus = ur5FwdKin(q_plus);
-        gst_minus = ur5FwdKin(q_minus);
-    
-        % Central difference approximation for ∂g/∂q_i
-        dg_dqi = (gst_plus - gst_minus) / (2 * epsilon);
-    
-        % Compute g⁻¹ ∂g/∂q_i
-        twist_matrix = inv(gst) * dg_dqi;
-    
-        % Twistify: Convert the 4x4 matrix to a 6D twist vector
-        xi = Twistify(twist_matrix);
-    
-        % Store the twist as the i-th column of J_approx
-        J_approx(:, i) = xi;
+        % Create the perturbation vector
+        ei = zeros(6, 1);
+        ei(i) = 1;
+        
+        % Compute gst for perturbed joint vectors
+        gst_plus = ur5FwdKin(q + epsilon * ei);
+        gst_minus = ur5FwdKin(q - epsilon * ei);
+        
+        % Compute the numerical derivative
+        dgdqi = (gst_plus - gst_minus) / (2 * epsilon);
+        
+        % Extract the relevant columns from g^-1 * dgdqi and populate the Jacobian
+        gst = ur5FwdKin(q); % Compute current transformation
+        g_inv = inv(gst);   % Compute inverse of current gst
+        
+        % Compute body twist ξ_i
+        xi = vee(g_inv * dgdqi); 
+        
+        % Add to the numerical Jacobian matrix
+        Jb_numerical(:, i) = xi;
     end
     
-    % Compute the error norm ||J_approx - J_actual||
-    errorNorm = norm(J_approx - J);
+    % Compare the analytical and numerical Jacobians
+    fprintf('Analytical Jacobian:\n');
+    disp(Jb_analytical);
     
-    % Display results
-    disp('Actual Jacobian (J):');
-    disp(J);
+    fprintf('Numerical Jacobian:\n');
+    disp(Jb_numerical);
     
-    disp('Approximate Jacobian (J_approx):');
-    disp(J_approx);
-    
-    disp('Norm of the error ||J_approx - J_actual||:');
-    disp(errorNorm);
+    % Compute the error between analytical and numerical Jacobians
+    error = norm(Jb_analytical - Jb_numerical, 'fro');
+    fprintf('Error between analytical and numerical Jacobians: %.6f\n', error);
     
 end
 
@@ -284,4 +279,8 @@ function M_h = homogeneous_matrix(angles_XYZ,translation)
             0,  0,  0,  1];
 end
 
+function xi = vee(matrix)
+    % Extracts the twist vector from a 4x4 transformation matrix
+    xi = [matrix(1:3, 4); matrix(3, 2); matrix(1, 3); matrix(2, 1)];
+end
 
