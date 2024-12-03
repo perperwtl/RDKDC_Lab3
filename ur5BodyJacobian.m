@@ -4,7 +4,9 @@ function Jb = ur5BodyJacobian(q)
     %   q: 6x1 joint space variables vector = [θ1, θ2, θ3, θ4, θ5, θ6].T
     % Output: 
     %   Jb: 6x6 Body Jacobian matrix
-    
+    q_offset = [0; -pi/2; 0; -pi/2; 0; 0];
+    q = q - q_offset;
+
     th1 = q(1);
     th2 = q(2);
     th3 = q(3);
@@ -63,7 +65,7 @@ function Jb = ur5BodyJacobian(q)
     x6 = RigidAdjoint(exi1 * exi2 * exi3 * exi4 * exi5) * xi6;
 
     Js = [xi1, x2, x3, x4, x5, x6];
-    g = ur5FwdKin(q);
+    g = ur5FwdKin(q + q_offset);
     adj = RigidAdjoint(g);
     Jb = inv(adj) * Js;
 

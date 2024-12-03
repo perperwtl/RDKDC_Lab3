@@ -11,6 +11,8 @@ is_test_manipulability = 1;
 is_test_getXi = 0;
 is_test_ur5RRcontrol = 0;
 
+q_offset = [0; -pi/2; 0; -pi/2; 0; 0];
+
 
 %% Test ur5FwdKin.m
 if is_test_ur5FwdKin
@@ -24,11 +26,10 @@ if is_test_ur5FwdKin
 
     q = q_home + angle;
     
-    q_offset = [0; -pi/2; 0; -pi/2; 0; 0];
-    g = ur5FwdKin(q-q_offset);
+    g = ur5FwdKin(q);
 
     ur5.move_joints(q, 5);
-    pause(5);
+    pause(6);
     fwd_real = ur5.get_current_transformation('base_link', 'tool0');
     
     

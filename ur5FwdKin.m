@@ -3,7 +3,10 @@ function gst = ur5FwdKin(q)
     %   q: 6x1 joint space variable vector = [θ1, θ2, θ3, θ4, θ5, θ6].T, where θn is the angle of joint n for n = 1, · · · , 6.
     % Output: 
     %   gst: end effector pose, gst (4 × 4 matrix)
-
+    
+    q_offset = [0; -pi/2; 0; -pi/2; 0; 0];
+    q = q - q_offset;
+    
     th1 = q(1);
     th2 = q(2);
     th3 = q(3);
