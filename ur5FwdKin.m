@@ -18,11 +18,40 @@ function gst = ur5FwdKin(q)
     l4 = 0.09475; 
     l5 = 0.0825; 
 
+    % Define unit vectors
+    e1 = [1; 0; 0];
+    e2 = [0; 1; 0];
+    e3 = [0; 0; 1];
+    
+    % Define axes of rotation for each joint
+    w1 = e3;  % Axis 1: Rotation about z-axis
+    w2 = e2;  % Axis 2: Rotation about y-axis
+    w3 = e2;  % Axis 3: Rotation about y-axis
+    w4 = e2;  % Axis 4: Rotation about y-axis
+    w5 = e3;  % Axis 5: Rotation about z-axis
+    w6 = e2;  % Axis 6: Rotation about y-axis
+    
+    % Define points on the joint axes
+    q1 = [0; 0; 0];
+    q2 = [0; 0; l0];
+    q3 = [0; 0; l0+l1];
+    q4 = [0; 0; l0+l1+l2];
+    q5 = [0; l3; l0+l1+l2];
+    q6 = [0; 0; l0+l1+l2+l4];
+    
+    % Define twists
+    xi1 = RevoluteTwist(q1, w1);
+    xi2 = RevoluteTwist(q2, w2);
+    xi3 = RevoluteTwist(q3, w3);
+    xi4 = RevoluteTwist(q4, w4);
+    xi5 = RevoluteTwist(q5, w5);
+    xi6 = RevoluteTwist(q6, w6);
+    
+    % Home configuration of the end-effector
+    gst0 = [[e1,-e3,e2], [0; l3 + l5; l0+l1+l2+l4]; 0,0,0,1];
+    
+    gst = expm(TwistExp(xi1)* th1) * expm(TwistExp(xi2)* th2) ...
+    * expm(TwistExp(xi3)* th3) * expm(TwistExp(xi4)* th4) ...
+    * expm(TwistExp(xi5)* th5) *expm(TwistExp(xi6)* th6) * gst0; 
 
-    % Compute the forward kinematics matrix
-    gst = [- cos(th6)*(cos(th5)*(sin(th1)*sin(th4) + cos(th4)*(cos(th1)*sin(th2)*sin(th3) - cos(th1)*cos(th2)*cos(th3))) + sin(th5)*(cos(th4)*sin(th1) - sin(th4)*(cos(th1)*sin(th2)*sin(th3) - cos(th1)*cos(th2)*cos(th3)))) - sin(th6)*(cos(th1)*cos(th2)*sin(th3) + cos(th1)*cos(th3)*sin(th2)),   sin(th6)*(cos(th5)*(sin(th1)*sin(th4) + cos(th4)*(cos(th1)*sin(th2)*sin(th3) - cos(th1)*cos(th2)*cos(th3))) + sin(th5)*(cos(th4)*sin(th1) - sin(th4)*(cos(th1)*sin(th2)*sin(th3) - cos(th1)*cos(th2)*cos(th3)))) - cos(th6)*(cos(th1)*cos(th2)*sin(th3) + cos(th1)*cos(th3)*sin(th2)), sin(th5)*(sin(th1)*sin(th4) + cos(th4)*(cos(th1)*sin(th2)*sin(th3) - cos(th1)*cos(th2)*cos(th3))) - cos(th5)*(cos(th4)*sin(th1) - sin(th4)*(cos(th1)*sin(th2)*sin(th3) - cos(th1)*cos(th2)*cos(th3))), l0*cos(th1)*sin(th2) - (sin(th6)*(cos(th5)*(sin(th1)*sin(th4) + cos(th4)*(cos(th1)*sin(th2)*sin(th3) - cos(th1)*cos(th2)*cos(th3))) + sin(th5)*(cos(th4)*sin(th1) - sin(th4)*(cos(th1)*sin(th2)*sin(th3) - cos(th1)*cos(th2)*cos(th3)))) - cos(th6)*(cos(th1)*cos(th2)*sin(th3) + cos(th1)*cos(th3)*sin(th2)))*(l0 + l1 + l2 + l4) - l3*(cos(th4)*sin(th1) - sin(th4)*(cos(th1)*sin(th2)*sin(th3) - cos(th1)*cos(th2)*cos(th3)))*(cos(th5) - 1) - sin(th6)*(cos(th5)*(sin(th1)*sin(th4) + cos(th4)*(cos(th1)*sin(th2)*sin(th3) - cos(th1)*cos(th2)*cos(th3))) + sin(th5)*(cos(th4)*sin(th1) - sin(th4)*(cos(th1)*sin(th2)*sin(th3) - cos(th1)*cos(th2)*cos(th3))))*(l0 + l1 + l2 + l4) - (cos(th5)*(cos(th4)*sin(th1) - sin(th4)*(cos(th1)*sin(th2)*sin(th3) - cos(th1)*cos(th2)*cos(th3))) - sin(th5)*(sin(th1)*sin(th4) + cos(th4)*(cos(th1)*sin(th2)*sin(th3) - cos(th1)*cos(th2)*cos(th3))))*(l3 + l5) + l3*sin(th5)*(sin(th1)*sin(th4) + cos(th4)*(cos(th1)*sin(th2)*sin(th3) - cos(th1)*cos(th2)*cos(th3))) + (cos(th6) - 1)*(cos(th1)*cos(th2)*sin(th3) + cos(th1)*cos(th3)*sin(th2))*(l0 + l1 + l2 + l4) + cos(th1)*cos(th2)*sin(th3)*(l0 + l1) + cos(th1)*sin(th2)*(cos(th3) - 1)*(l0 + l1);
-  cos(th6)*(cos(th5)*(cos(th1)*sin(th4) - cos(th4)*(sin(th1)*sin(th2)*sin(th3) - cos(th2)*cos(th3)*sin(th1))) + sin(th5)*(cos(th1)*cos(th4) + sin(th4)*(sin(th1)*sin(th2)*sin(th3) - cos(th2)*cos(th3)*sin(th1)))) - sin(th6)*(cos(th2)*sin(th1)*sin(th3) + cos(th3)*sin(th1)*sin(th2)), - sin(th6)*(cos(th5)*(cos(th1)*sin(th4) - cos(th4)*(sin(th1)*sin(th2)*sin(th3) - cos(th2)*cos(th3)*sin(th1))) + sin(th5)*(cos(th1)*cos(th4) + sin(th4)*(sin(th1)*sin(th2)*sin(th3) - cos(th2)*cos(th3)*sin(th1)))) - cos(th6)*(cos(th2)*sin(th1)*sin(th3) + cos(th3)*sin(th1)*sin(th2)), cos(th5)*(cos(th1)*cos(th4) + sin(th4)*(sin(th1)*sin(th2)*sin(th3) - cos(th2)*cos(th3)*sin(th1))) - sin(th5)*(cos(th1)*sin(th4) - cos(th4)*(sin(th1)*sin(th2)*sin(th3) - cos(th2)*cos(th3)*sin(th1))), (cos(th5)*(cos(th1)*cos(th4) + sin(th4)*(sin(th1)*sin(th2)*sin(th3) - cos(th2)*cos(th3)*sin(th1))) - sin(th5)*(cos(th1)*sin(th4) - cos(th4)*(sin(th1)*sin(th2)*sin(th3) - cos(th2)*cos(th3)*sin(th1))))*(l3 + l5) + (sin(th6)*(cos(th5)*(cos(th1)*sin(th4) - cos(th4)*(sin(th1)*sin(th2)*sin(th3) - cos(th2)*cos(th3)*sin(th1))) + sin(th5)*(cos(th1)*cos(th4) + sin(th4)*(sin(th1)*sin(th2)*sin(th3) - cos(th2)*cos(th3)*sin(th1)))) + cos(th6)*(cos(th2)*sin(th1)*sin(th3) + cos(th3)*sin(th1)*sin(th2)))*(l0 + l1 + l2 + l4) + (cos(th6) - 1)*(cos(th2)*sin(th1)*sin(th3) + cos(th3)*sin(th1)*sin(th2))*(l0 + l1 + l2 + l4) + l3*(cos(th1)*cos(th4) + sin(th4)*(sin(th1)*sin(th2)*sin(th3) - cos(th2)*cos(th3)*sin(th1)))*(cos(th5) - 1) + sin(th6)*(cos(th5)*(cos(th1)*sin(th4) - cos(th4)*(sin(th1)*sin(th2)*sin(th3) - cos(th2)*cos(th3)*sin(th1))) + sin(th5)*(cos(th1)*cos(th4) + sin(th4)*(sin(th1)*sin(th2)*sin(th3) - cos(th2)*cos(th3)*sin(th1))))*(l0 + l1 + l2 + l4) + l0*sin(th1)*sin(th2) - l3*sin(th5)*(cos(th1)*sin(th4) - cos(th4)*(sin(th1)*sin(th2)*sin(th3) - cos(th2)*cos(th3)*sin(th1))) + cos(th2)*sin(th1)*sin(th3)*(l0 + l1) + sin(th1)*sin(th2)*(cos(th3) - 1)*(l0 + l1);
-                                                                                                                                                                                                                     - cos(th2 + th3)*sin(th6) - cos(th4 + th5)*sin(th2 + th3)*cos(th6),                                                                                                                                                                                                                        cos(th4 + th5)*sin(th2 + th3)*sin(th6) - cos(th2 + th3)*cos(th6),                                                                                                                                                                         sin(th2 + th3)*sin(th4 + th5),                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    l0*(cos(th2) - 1) + (cos(th2 + th3)*(l0 + l1))/2 + (cos(th2 + th3)*cos(th6) - cos(th4 + th5)*sin(th2 + th3)*sin(th6))*(l0 + l1 + l2 + l4) - (cos(th2 - th3)*(l0 + l1))/2 + sin(th2 + th3)*sin(th4 + th5)*(l3 + l5) + (l3*sin(th2 + th3)*sin(th4 + th5))/2 + cos(th2 + th3)*(cos(th6) - 1)*(l0 + l1 + l2 + l4) - (l3*sin(th4 - th5)*sin(th2 + th3))/2 + cos(th2)*(cos(th3) - 1)*(l0 + l1) + l3*sin(th2 + th3)*sin(th4)*(cos(th5) - 1) - cos(th4 + th5)*sin(th2 + th3)*sin(th6)*(l0 + l1 + l2 + l4);
-                                                                                                                                                                                                                                                                                      0,                                                                                                                                                                                                                                                                                       0,                                                                                                                                                                                                     0,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    1];
- 
 end

@@ -39,14 +39,11 @@ xi6 = RevoluteTwist(q6, w6);
 gst0 = RPToHomogeneous([e1,-e3,e2], [0; l3 + l5; l0+l1+l2+l4]);%reverse x and y axis
 
 % Compute forward kinematics with joint offsets
-joint_offsets = [0; -pi/2; 0; -pi/2; 0; 0]; % New initial configuration offsets
+% joint_offsets = [0; -pi/2; 0; -pi/2; 0; 0]; % New initial configuration offsets
 joint_offsets = [0;0;0;0;0;0];
-gst = ForwardKinematics({xi1, th1 + joint_offsets(1); 
-                         xi2, th2 + joint_offsets(2); 
-                         xi3, th3 + joint_offsets(3); 
-                         xi4, th4 + joint_offsets(4); 
-                         xi5, th5 + joint_offsets(5); 
-                         xi6, th6 + joint_offsets(6)}, gst0);
+gst = expm(TwistExp(xi1)* th1) * expm(TwistExp(xi2)* th2) ...
+* expm(TwistExp(xi3)* th3) * expm(TwistExp(xi4)* th4) ...
+* expm(TwistExp(xi5)* th5) *expm(TwistExp(xi6)* th6) * gst0;
 
 disp('Forward Kinematics Map (Simplified):');
 disp(simplify(gst));
@@ -97,32 +94,14 @@ end
 
 % RevoluteTwist Function
 function xi = RevoluteTwist(q, w)
-    v = -cross(q, w);
+    v = -cross(w, q);
     xi = [v; w];
 end
 
 
 % TwistExp Function
-function g = TwistExp(xi, th)
-    % Computes the matrix exponential of a twist
-    % Input: xi - 6x1 twist vector, th - joint angle/displacement
-    % Output: g - 4x4 homogeneous transformation matrix
-
-    w = xi(4:6);  % Angular velocity
-    v = xi(1:3);  % Linear velocity
-    w_skew = hat(w);
-
-    if norm(w) == 0
-        % Pure translation
-        R = eye(3);
-        p = v * th;
-    else
-        % Rotation with translation
-        R = eye(3) + sin(th) * w_skew + (1 - cos(th)) * w_skew^2;
-        p = (eye(3) - R) * cross(w, v) + (w * (w' * v)) * th;
-    end
-
-    g = [R, p; 0, 0, 0, 1];
+function g = TwistExp(xi)
+    g = [hat(xi(4:6)), xi(1:3); zeros(1,3), 0];
 end
 
 % RPToHomogeneous Function
@@ -148,5 +127,5 @@ function Ad = RigidAdjoint(g)
     R = g(1:3, 1:3);  % Rotation part
     p = g(1:3, 4);    % Translation part
     Ad = [R, hat(p) * R;
-          zeros(3, 3), R];
+          zeros(3), R];
 end
